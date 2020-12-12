@@ -36,7 +36,7 @@ const store = new Store<ISettings>({
 		'1.1.5': store => {
 			const serverURL = store.get('serverURL');
 			if (serverURL === 'http://54.193.94.35:9736') {
-				store.set('serverURL', 'https://crewl.ink');
+				store.set('serverURL', 'https://sus.chat');
 			}
 		},
 		'1.1.6': store => {
@@ -67,7 +67,7 @@ const store = new Store<ISettings>({
 		},
 		serverURL: {
 			type: 'string',
-			default: 'https://crewl.ink',
+			default: 'https://sus.chat',
 			format: 'uri'
 		},
 		pushToTalkShortcut: {
@@ -102,11 +102,6 @@ const store = new Store<ISettings>({
 	}
 });
 
-store.onDidChange('serverURL', (newUrl) => {
-	if (newUrl === 'http://54.193.94.35:9736') {
-		store.set('serverURL', 'https://crewl.ink');
-	}
-});
 
 export interface SettingsProps {
 	open: boolean;
@@ -288,7 +283,7 @@ const Settings: React.FC<SettingsProps> = function ({ open, onClose }: SettingsP
 				<label>Deafen Shortcut</label>
 				<input spellCheck={false} type="text" value={settings.deafenShortcut} readOnly onKeyDown={(ev) => setShortcut(ev, 'deafenShortcut')} />
 			</div>
-			<div className="form-control l m" style={{ color: '#3498db' }}>
+			{/* <div className="form-control l m" style={{ color: '#3498db' }}>
 				<label>Voice Server</label>
 				<URLInput initialURL={settings.serverURL} onValidURL={(url: string) => {
 					setSettings({
@@ -296,7 +291,7 @@ const Settings: React.FC<SettingsProps> = function ({ open, onClose }: SettingsP
 						action: ['serverURL', url]
 					});
 				}} />
-			</div>
+			</div> */}
 			<div className="form-control m" style={{ color: '#9b59b6' }} onClick={() => setSettings({
 				type: 'setOne',
 				action: ['hideCode', !settings.hideCode]

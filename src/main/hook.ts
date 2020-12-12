@@ -39,11 +39,11 @@ async function loadOffsets(event: Electron.IpcMainEvent): Promise<IOffsets | und
 			version = json.app_ver;
 		} catch (e) {
 			console.error(e);
-			event.reply('error', `Couldn't determine the Among Us version - ${e}. Try opening Among Us and then restarting CrewLink.`);
+			event.reply('error', `Couldn't determine the Among Us version - ${e}. Try opening Among Us and then restarting Sus Chat.`);
 			return;
 		}
 	} else {
-		event.reply('error', 'Couldn\'t determine the Among Us version - Unity analytics file doesn\'t exist. Try opening Among Us and then restarting CrewLink.');
+		event.reply('error', 'Couldn\'t determine the Among Us version - Unity analytics file doesn\'t exist. Try opening Among Us and then restarting Sus Chat.');
 		return;
 	}
 
@@ -81,7 +81,7 @@ async function loadOffsets(event: Electron.IpcMainEvent): Promise<IOffsets | und
 	try {
 		IOffsets.check(offsets);
 		if (!version) {
-			event.reply('error', 'Couldn\'t determine the Among Us version. Try opening Among Us and then restarting CrewLink.');
+			event.reply('error', 'Couldn\'t determine the Among Us version. Try opening Among Us and then restarting Sus Chat.');
 			return;
 		} else {
 			store.set('offsets', {

@@ -1,20 +1,11 @@
 {
-  "name": "crewlink",
+  "name": "suschat-client",
   "version": "1.1.6",
   "license": "GPL-3.0-or-later",
   "description": "Free, open, Among Us proximity voice chat",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ottomated/crewlink.git"
-  },
-  "funding": {
-    "type": "individual",
-    "url": "https://paypal.me/ottomated"
-  },
-  "author": {
-    "name": "Ottomated",
-    "email": "otto@ottomated.net",
-    "url": "https://ottomated.net"
+    "url": "https://github.com/Sus-Chat/SusChat-Client.git"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",

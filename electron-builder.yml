@@ -1,6 +1,6 @@
-appId: net.ottomated.crewlink
-productName: CrewLink
-copyright: Copyright © 2020 Ottomated
+appId: chat.sus
+productName: SusChat
+copyright: Copyright
 directories:
   output: dist
   buildResources: resources
