@@ -78,6 +78,10 @@ const store = new Store<ISettings>({
 			type: 'string',
 			default: 'RControl'
 		},
+		muteShortcut: {
+			type: 'string',
+			default: 'RAlt'
+		},
 		offsets: {
 			type: 'object',
 			properties: {
@@ -251,6 +255,11 @@ const Settings: React.FC<SettingsProps> = function ({ open, onClose }: SettingsP
 				<div className="form-control m" style={{ color: '#f1c40f' }}>
 					<input spellCheck={false} type="text" value={settings.pushToTalkShortcut} readOnly onKeyDown={(ev) => setShortcut(ev, 'pushToTalkShortcut')} />
 				</div>
+			}
+			{!settings.pushToTalk && <div className="form-control l m" style={{ color: '#2ecc71' }}>
+				<label>Mute Shortcut</label>
+				<input spellCheck={false} type="text" value={settings.muteShortcut} readOnly onKeyDown={(ev) => setShortcut(ev, 'muteShortcut')} />
+			</div>
 			}
 			<div className="form-control l m" style={{ color: '#2ecc71' }}>
 				<label>Deafen Shortcut</label>

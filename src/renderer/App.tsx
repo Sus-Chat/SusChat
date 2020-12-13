@@ -29,6 +29,7 @@ function App() {
 		serverURL: 'https://sus.chat',
 		pushToTalkShortcut: 'V',
 		deafenShortcut: 'RControl',
+		muteShortcut: 'RAlt',
 		offsets: {
 			version: '',
 			data: ''

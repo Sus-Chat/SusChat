@@ -121,6 +121,9 @@ ipcMain.on('start', async (event) => {
 			if (keyCodeMatches(store.get('deafenShortcut') as K, ev)) {
 				event.reply('toggleDeafen');
 			}
+			if (keyCodeMatches(store.get('muteShortcut', 'RAlt') as K, ev)) {
+				event.reply('toggleMute');
+			}
 		});
 
 		iohook.start();
