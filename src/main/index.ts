@@ -69,6 +69,19 @@ function createMainWindow() {
 	return window;
 }
 
+async function injectExtensions () {
+    console.log( `Attempting to inject extensions...` );
+
+    // add react devtools
+    const installExtension = await import( 'electron-devtools-installer' );
+    try {
+      const name = await installExtension.default( installExtension.REACT_DEVELOPER_TOOLS );
+      console.log( `Added Extension:  ${name}` );
+    } catch ( error ) {
+      console.error( 'An error occurred installing extension(s): ', error );
+    }
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
 	app.quit();
@@ -81,7 +94,6 @@ if (!gotTheLock) {
 			mainWindow.focus();
 		}
 	});
-
 
 	// quit application when all windows are closed
 	app.on('window-all-closed', () => {
@@ -99,7 +111,12 @@ if (!gotTheLock) {
 	});
 
 	// create main BrowserWindow when electron is ready
-	app.on('ready', () => {
-		mainWindow = createMainWindow();
+	app.on('ready', async () => {
+
+    mainWindow = createMainWindow();
+
+    if (isDevelopment) {
+      await injectExtensions();
+    }
 	});
 }
