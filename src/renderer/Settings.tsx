@@ -126,33 +126,6 @@ interface MediaDevice {
 	label: string;
 }
 
-type URLInputProps = {
-	initialURL: string,
-	onValidURL: (url: string) => void
-};
-
-function URLInput({ initialURL, onValidURL }: URLInputProps) {
-	const [isValidURL, setURLValid] = useState(true);
-	const [currentURL, setCurrentURL] = useState(initialURL);
-
-	useEffect(() => {
-		setCurrentURL(initialURL);
-	}, [initialURL]);
-
-	function onChange(event: React.ChangeEvent<HTMLInputElement>) {
-		setCurrentURL(event.target.value);
-
-		if (validateURL(event.target.value)) {
-			setURLValid(true);
-			onValidURL(event.target.value);
-		} else {
-			setURLValid(false);
-		}
-	}
-
-	return <input className={isValidURL ? '' : 'input-error'} spellCheck={false} type="text" value={currentURL} onChange={onChange} />;
-}
-
 const Settings: React.FC<SettingsProps> = function ({ open, onClose }: SettingsProps) {
 	const [settings, setSettings] = useContext(SettingsContext);
 	const [unsavedCount, setUnsavedCount] = useState(0);
