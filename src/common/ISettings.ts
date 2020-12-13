@@ -1,4 +1,3 @@
-
 export interface ISettings {
 	alwaysOnTop: boolean;
 	microphone: string;
@@ -11,7 +10,7 @@ export interface ISettings {
 	offsets: {
 		version: string;
 		data: string;
-	},
+	};
 	hideCode: boolean;
 	enableSpatialAudio: boolean;
 }

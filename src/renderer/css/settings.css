@@ -1,5 +1,5 @@
 #settings {
-	transition: transform .2s ease-in;
+	transition: transform 0.2s ease-in;
 	width: 100vw;
 	height: 100vh;
 	background: #171717ad;
@@ -31,14 +31,14 @@
 
 .titlebar-button.back {
 	right: 2px;
-	transition: transform .1s linear;
+	transition: transform 0.1s linear;
 }
 
 .titlebar-button.back:hover {
 	transform: translateX(-1px);
 }
 
-input[type="text"] {
+input[type='text'] {
 	background: #1d1d1d;
 	border: 1px solid rgba(255, 255, 255, 0.5);
 	outline: none;
@@ -48,10 +48,10 @@ input[type="text"] {
 }
 
 .form-control.m .input-error {
-	border-color: #b00020
+	border-color: #b00020;
 }
 
-input[type="text"]:focus {
+input[type='text']:focus {
 	border-color: white;
 }
 

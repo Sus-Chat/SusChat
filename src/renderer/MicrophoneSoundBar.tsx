@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
 interface TestMicProps {
-	microphone: string
+	microphone: string;
 }
 
-const TestMicrophoneButton: React.FC<TestMicProps> = function ({ microphone } : TestMicProps) {
+const TestMicrophoneButton: React.FC<TestMicProps> = function ({
+	microphone,
+}: TestMicProps) {
 	const [error, setError] = useState<boolean>(false);
 	const [rms, setRms] = useState<number>(0);
 
@@ -33,8 +35,9 @@ const TestMicrophoneButton: React.FC<TestMicProps> = function ({ microphone } : 
 			setRms(rms);
 		};
 
-		navigator.mediaDevices.getUserMedia({ audio: { deviceId: microphone ?? 'default' } })
-			.then((stream) => {
+		navigator.mediaDevices
+			.getUserMedia({ audio: { deviceId: microphone ?? 'default' } })
+			.then(stream => {
 				const src = ctx.createMediaStreamSource(stream);
 				src.connect(processor);
 				processor.addEventListener('audioprocess', handleProcess);
@@ -46,9 +49,21 @@ const TestMicrophoneButton: React.FC<TestMicProps> = function ({ microphone } : 
 		};
 	}, [microphone]);
 
-	if (error) return <p style={{ fontSize: 14, color: '#e74c3c' }}>Could not connect to microphone</p>;
+	if (error)
+		return (
+			<p style={{ fontSize: 14, color: '#e74c3c' }}>
+				Could not connect to microphone
+			</p>
+		);
 
-	return <div className="microphone-bar"><div className="microphone-bar-inner" style={{ width: `${rms * 2 * 100}%` }}></div></div>;
+	return (
+		<div className="microphone-bar">
+			<div
+				className="microphone-bar-inner"
+				style={{ width: `${rms * 2 * 100}%` }}
+			></div>
+		</div>
+	);
 };
 
 export default TestMicrophoneButton;

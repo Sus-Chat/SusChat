@@ -31,8 +31,8 @@ function createMainWindow() {
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
-			webSecurity: false
-		}
+			webSecurity: false,
+		},
 	});
 
 	mainWindowState.manage(window);
@@ -42,17 +42,20 @@ function createMainWindow() {
 	}
 
 	if (isDevelopment) {
-		window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?version=${autoUpdater.currentVersion.version}`);
-	}
-	else {
-		window.loadURL(formatUrl({
-			pathname: joinPath(__dirname, 'index.html'),
-			protocol: 'file',
-			query: {
-				version: autoUpdater.currentVersion.version
-			},
-			slashes: true
-		}));
+		window.loadURL(
+			`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?version=${autoUpdater.currentVersion.version}`,
+		);
+	} else {
+		window.loadURL(
+			formatUrl({
+				pathname: joinPath(__dirname, 'index.html'),
+				protocol: 'file',
+				query: {
+					version: autoUpdater.currentVersion.version,
+				},
+				slashes: true,
+			}),
+		);
 	}
 
 	window.on('closed', () => {
@@ -69,17 +72,19 @@ function createMainWindow() {
 	return window;
 }
 
-async function injectExtensions () {
-    console.log( `Attempting to inject extensions...` );
+async function injectExtensions() {
+	console.log('Attempting to inject extensions...');
 
-    // add react devtools
-    const installExtension = await import( 'electron-devtools-installer' );
-    try {
-      const name = await installExtension.default( installExtension.REACT_DEVELOPER_TOOLS );
-      console.log( `Added Extension:  ${name}` );
-    } catch ( error ) {
-      console.error( 'An error occurred installing extension(s): ', error );
-    }
+	// add react devtools
+	const installExtension = await import('electron-devtools-installer');
+	try {
+		const name = await installExtension.default(
+			installExtension.REACT_DEVELOPER_TOOLS,
+		);
+		console.log(`Added Extension:  ${name}`);
+	} catch (error) {
+		console.error('An error occurred installing extension(s): ', error);
+	}
 }
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -112,11 +117,10 @@ if (!gotTheLock) {
 
 	// create main BrowserWindow when electron is ready
 	app.on('ready', async () => {
+		mainWindow = createMainWindow();
 
-    mainWindow = createMainWindow();
-
-    if (isDevelopment) {
-      await injectExtensions();
-    }
+		if (isDevelopment) {
+			await injectExtensions();
+		}
 	});
 }

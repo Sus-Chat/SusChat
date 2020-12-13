@@ -4,6 +4,6 @@ import { Player } from './common/AmongUsState';
 export default create({
 	objectHash: (obj: Player) => obj.ptr,
 	arrays: {
-		detectMove:false
-	}
+		detectMove: false,
+	},
 });

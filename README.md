@@ -1,4 +1,3 @@
-
 # Sus Chat
 
 A lobby matcher for Among Us, with built-in Voice chat and Proximity.
@@ -11,27 +10,31 @@ Download the latest version from [releases](https://github.com/ottomated/CrewLin
 
 You only need to follow the below instructions if you are trying to modify this software. Otherwise, please download the latest version from the github Releases tab.
 
-
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
-* [Python 3](https://www.python.org/downloads/)
-* [node.js](https://nodejs.org/en/download/)
-* yarn
 
+- [Python 3](https://www.python.org/downloads/)
+- [node.js](https://nodejs.org/en/download/)
+- yarn
 
 ### Setup
 
 1. Clone the repo
+
 ```sh
 git clone https://github.com/Sus-Chat/SusChat.git
 cd SusChat
 ```
+
 2. Install NPM packages
+
 ```sh
 yarn install
 ```
+
 3. Run the project
+
 ```JS
 yarn dev
 ```
