@@ -11,6 +11,8 @@
 	"scripts": {
 		"postinstall": "electron-builder install-app-deps",
 		"lint": "eslint src",
+		"prettier": "prettier -c .",
+		"fix": "yarn run lint --fix && prettier -w .",
 		"dev": "electron-webpack dev",
 		"compile": "electron-webpack",
 		"dist": "yarn compile && electron-builder --win --x64 --ia32",
