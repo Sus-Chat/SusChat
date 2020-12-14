@@ -7,6 +7,7 @@ import Peer from 'simple-peer';
 import { ipcRenderer, remote } from 'electron';
 import VAD from './vad';
 import { ISettings } from '../common/ISettings';
+import fs from 'fs';
 
 export interface ExtendedAudioElement extends HTMLAudioElement {
 	setSinkId: (sinkId: string) => Promise<void>;
@@ -21,6 +22,9 @@ interface AudioElements {
 		element: HTMLAudioElement;
 		gain: GainNode;
 		pan: PannerNode;
+		reverbGain: GainNode | null;
+		reverb: ConvolverNode | null;
+		compressor: DynamicsCompressorNode;
 	};
 }
 
@@ -51,6 +55,7 @@ function calculateVoiceAudio(
 	other: Player,
 	gain: GainNode,
 	pan: PannerNode,
+	reverbGain: GainNode | null,
 ): void {
 	const audioContext = pan.context;
 	pan.positionZ.setValueAtTime(-0.5, audioContext.currentTime);
@@ -65,6 +70,7 @@ function calculateVoiceAudio(
 	if (isNaN(panPos[1])) panPos[1] = 999;
 	panPos[0] = Math.min(999, Math.max(-999, panPos[0]));
 	panPos[1] = Math.min(999, Math.max(-999, panPos[1]));
+	// Don't hear people inside vents
 	if (other.inVent) {
 		if (me.inVent) {
 			gain.gain.value = 1;
@@ -76,13 +82,21 @@ function calculateVoiceAudio(
 			return;
 		}
 	}
+	// Ghosts can hear other ghosts
 	if (me.isDead && other.isDead) {
 		gain.gain.value = 1;
 		pan.positionX.setValueAtTime(panPos[0], audioContext.currentTime);
 		pan.positionY.setValueAtTime(panPos[1], audioContext.currentTime);
 		return;
 	}
-	if (!me.isDead && other.isDead) {
+	// Living crewmates cannot hear ghosts
+	if (
+		!me.isDead &&
+		other.isDead &&
+		(!me.isImpostor ||
+			!settings.haunting ||
+			state.gameState !== GameState.TASKS)
+	) {
 		gain.gain.value = 0;
 		return;
 	}
@@ -106,6 +120,21 @@ function calculateVoiceAudio(
 	) {
 		gain.gain.value = 0;
 	}
+	// Living impostors hear ghosts at a faint volume
+	if (
+		gain.gain.value > 0 &&
+		!me.isDead &&
+		me.isImpostor &&
+		other.isDead &&
+		settings.haunting
+	) {
+		gain.gain.value = gain.gain.value * 0.015;
+		if (reverbGain) reverbGain.gain.value = 1;
+	}
+}
+
+function toArrayBuffer(buf: Buffer) {
+	return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 }
 
 const Voice: React.FC = function () {
@@ -127,6 +156,12 @@ const Voice: React.FC = function () {
 	const [deafenedState, setDeafened] = useState(false);
 	const [mutedState, setMuted] = useState(false);
 	const [connected, setConnected] = useState(false);
+
+	let reverbFile: Buffer;
+	if (fs.existsSync('static/reverb.ogx'))
+		reverbFile = fs.readFileSync('static/reverb.ogx');
+	else if (fs.existsSync('resources/static/reverb.ogx'))
+		reverbFile = fs.readFileSync('resources/static/reverb.ogx');
 
 	// Handle pushToTalk, if set
 	useEffect(() => {
@@ -265,6 +300,9 @@ const Voice: React.FC = function () {
 							document.body.removeChild(audioElements.current[peer].element);
 							audioElements.current[peer].pan.disconnect();
 							audioElements.current[peer].gain.disconnect();
+							audioElements.current[peer].reverbGain?.disconnect();
+							audioElements.current[peer].reverb?.disconnect();
+							audioElements.current[peer].compressor.disconnect();
 							delete audioElements.current[peer];
 						}
 					}
@@ -299,6 +337,8 @@ const Voice: React.FC = function () {
 						const source = context.createMediaStreamSource(stream);
 						const gain = context.createGain();
 						const pan = context.createPanner();
+						const compressor = context.createDynamicsCompressor();
+
 						pan.refDistance = 0.1;
 						pan.panningModel = 'equalpower';
 						pan.distanceModel = 'linear';
@@ -307,8 +347,32 @@ const Voice: React.FC = function () {
 
 						source.connect(pan);
 						pan.connect(gain);
-						// Source -> pan -> gain -> VAD -> destination
-						VAD(context, gain, context.destination, {
+						gain.connect(compressor);
+
+						let reverb: ConvolverNode | null = null;
+						let reverbGain: GainNode | null = null;
+						if (settings.haunting) {
+							reverb = context.createConvolver();
+							reverbGain = context.createGain();
+							reverbGain.gain.value = 0;
+
+							context.decodeAudioData(
+								toArrayBuffer(reverbFile),
+								function (buffer) {
+									if (reverb) reverb.buffer = buffer;
+								},
+								function (e) {
+									alert('Error when decoding audio data' + e);
+								},
+							);
+
+							gain.connect(reverbGain);
+							reverbGain.connect(reverb);
+							reverb.connect(compressor);
+						}
+
+						// Source -> pan -> gain -> compressor -> VAD -> destination
+						VAD(context, compressor, context.destination, {
 							onVoiceStart: () => setTalking(true),
 							onVoiceStop: () => setTalking(false),
 							stereo: settingsRef.current.enableSpatialAudio,
@@ -323,7 +387,14 @@ const Voice: React.FC = function () {
 								return socketPlayerIds;
 							});
 						};
-						audioElements.current[peer] = { element: audio, gain, pan };
+						audioElements.current[peer] = {
+							element: audio,
+							gain,
+							pan,
+							reverbGain,
+							reverb,
+							compressor,
+						};
 					});
 					connection.on('signal', data => {
 						socket.emit('signal', {
@@ -406,6 +477,7 @@ const Voice: React.FC = function () {
 					player,
 					audio.gain,
 					audio.pan,
+					audio.reverbGain,
 				);
 				if (connectionStuff.current.deafened) {
 					audio.gain.gain.value = 0;
