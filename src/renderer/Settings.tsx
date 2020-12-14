@@ -1,11 +1,16 @@
 import Store from 'electron-store';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
-import { SettingsContext } from './contexts';
+import {
+	SettingsContext,
+	LobbySettingsContext,
+	GameStateContext,
+} from './contexts';
 import Ajv from 'ajv';
 import './css/settings.css';
 import MicrophoneSoundBar from './MicrophoneSoundBar';
 import TestSpeakersButton from './TestSpeakersButton';
-import { ISettings } from '../common/ISettings';
+import { ISettings, ILobbySettings } from '../common/ISettings';
+import { GameState } from '../common/AmongUsState';
 
 const keys = new Set([
 	'Space',
@@ -69,6 +74,10 @@ const store = new Store<ISettings>({
 			// @ts-ignore
 			store.delete('stereoInLobby');
 		},
+		'1.1.7': store => {
+			// @ts-ignore
+			store.delete('offsets');
+		},
 	},
 	schema: {
 		alwaysOnTop: {
@@ -129,6 +138,12 @@ const store = new Store<ISettings>({
 			type: 'boolean',
 			default: true,
 		},
+		localLobbySettings: {
+			type: 'object',
+			default: {
+				maxDistance: 5.32,
+			},
+		},
 	},
 });
 
@@ -140,13 +155,36 @@ export interface SettingsProps {
 export const settingsReducer = (
 	state: ISettings,
 	action: {
-		type: 'set' | 'setOne';
+		type: 'set' | 'setOne' | 'setLobbySetting';
 		action: [string, unknown] | ISettings;
 	},
 ): ISettings => {
 	if (action.type === 'set') return action.action as ISettings;
 	const v = action.action as [string, unknown];
+	if (action.type === 'setLobbySetting') {
+		const settings = {
+			...state.localLobbySettings,
+			[v[0]]: v[1],
+		};
+		v[0] = 'localLobbySettings';
+		v[1] = settings;
+	}
 	store.set(v[0], v[1]);
+	return {
+		...state,
+		[v[0]]: v[1],
+	};
+};
+
+export const lobbySettingsReducer = (
+	state: ILobbySettings,
+	action: {
+		type: 'set' | 'setOne';
+		action: [string, unknown] | ILobbySettings;
+	},
+): ILobbySettings => {
+	if (action.type === 'set') return action.action as ILobbySettings;
+	const v = action.action as [string, unknown];
 	return {
 		...state,
 		[v[0]]: v[1],
@@ -164,6 +202,8 @@ const Settings: React.FC<SettingsProps> = function ({
 	onClose,
 }: SettingsProps) {
 	const [settings, setSettings] = useContext(SettingsContext);
+	const gameState = useContext(GameStateContext);
+	const [lobbySettings] = useContext(LobbySettingsContext);
 	const [unsavedCount, setUnsavedCount] = useState(0);
 	const unsaved = unsavedCount > 2;
 	useEffect(() => {
@@ -240,6 +280,10 @@ const Settings: React.FC<SettingsProps> = function ({
 				width="20px"
 				height="20px"
 				onClick={() => {
+					setSettings({
+						type: 'setOne',
+						action: ['localLobbySettings', lobbySettings],
+					});
 					if (unsaved) {
 						onClose();
 						location.reload();
@@ -383,7 +427,12 @@ const Settings: React.FC<SettingsProps> = function ({
 					<label>Show Lobby Code</label>
 				</div>
 				<div
-					className="form-control m"
+					className={
+						gameState.gameState === GameState.MENU ||
+						gameState.gameState === undefined
+							? 'form-control m'
+							: 'form-control'
+					}
 					style={{ color: '#fd79a8' }}
 					onClick={() =>
 						setSettings({
@@ -406,6 +455,39 @@ const Settings: React.FC<SettingsProps> = function ({
 				>
 					<span>Exit to apply changes</span>
 				</div>
+				{gameState.gameState !== undefined &&
+					gameState.gameState !== GameState.MENU && (
+						<h2 style={{ color: '#e74c3c' }}>Lobby settings</h2>
+					)}
+				{gameState.gameState !== undefined &&
+				gameState.gameState !== GameState.MENU &&
+				gameState.isHost === true ? (
+					<div className="form-control l m" style={{ color: '#3498db' }}>
+						<label>Max Distance</label>
+						<input
+							spellCheck={false}
+							type="range"
+							min="1"
+							max="10"
+							step="0.1"
+							onChange={ev =>
+								setSettings({
+									type: 'setLobbySetting',
+									action: ['maxDistance', parseFloat(ev.target.value)],
+								})
+							}
+							value={settings.localLobbySettings.maxDistance}
+						/>
+						<span>{settings.localLobbySettings.maxDistance}</span>
+					</div>
+				) : (
+					gameState.gameState !== undefined &&
+					gameState.gameState !== GameState.MENU && (
+						<div className="form-control l m" style={{ color: '#3498db' }}>
+							<label>Max Distance: {lobbySettings.maxDistance}</label>
+						</div>
+					)
+				)}
 			</div>
 			<div
 				className="form-control m"
@@ -425,6 +507,39 @@ const Settings: React.FC<SettingsProps> = function ({
 				/>
 				<label>Impostors Hear Ghosts</label>
 			</div>
+			{gameState.gameState !== undefined &&
+				gameState.gameState !== GameState.MENU && (
+					<h2 style={{ color: '#e74c3c' }}>Lobby settings</h2>
+				)}
+			{gameState.gameState !== undefined &&
+			gameState.gameState !== GameState.MENU &&
+			gameState.isHost === true ? (
+				<div className="form-control l m" style={{ color: '#3498db' }}>
+					<label>Max Distance</label>
+					<input
+						spellCheck={false}
+						type="range"
+						min="1"
+						max="10"
+						step="0.1"
+						onChange={ev =>
+							setSettings({
+								type: 'setLobbySetting',
+								action: ['maxDistance', parseFloat(ev.target.value)],
+							})
+						}
+						value={settings.localLobbySettings.maxDistance}
+					/>
+					<span>{settings.localLobbySettings.maxDistance}</span>
+				</div>
+			) : (
+				gameState.gameState !== undefined &&
+				gameState.gameState !== GameState.MENU && (
+					<div className="form-control l m" style={{ color: '#3498db' }}>
+						<label>Max Distance: {lobbySettings.maxDistance}</label>
+					</div>
+				)
+			)}
 		</div>
 	);
 };

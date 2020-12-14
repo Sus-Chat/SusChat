@@ -3,6 +3,9 @@ export interface AmongUsState {
 	oldGameState: GameState;
 	lobbyCode: string;
 	players: Player[];
+	isHost: boolean;
+	clientId: number;
+	hostId: number;
 }
 export interface Player {
 	ptr: number;

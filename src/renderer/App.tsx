@@ -4,8 +4,12 @@ import Voice from './Voice';
 import Menu from './Menu';
 import { ipcRenderer, remote } from 'electron';
 import { AmongUsState } from '../common/AmongUsState';
-import Settings, { settingsReducer } from './Settings';
-import { GameStateContext, SettingsContext } from './contexts';
+import Settings, { settingsReducer, lobbySettingsReducer } from './Settings';
+import {
+	GameStateContext,
+	SettingsContext,
+	LobbySettingsContext,
+} from './contexts';
 
 let appVersion = '';
 if (typeof window !== 'undefined' && window.location) {
@@ -39,6 +43,12 @@ function App() {
 		hideCode: false,
 		enableSpatialAudio: true,
 		haunting: true,
+		localLobbySettings: {
+			maxDistance: 5.32,
+		},
+	});
+	const lobbySettings = useReducer(lobbySettingsReducer, {
+		maxDistance: 5.32,
 	});
 
 	useEffect(() => {
@@ -78,6 +88,7 @@ function App() {
 	}
 	return (
 		<GameStateContext.Provider value={gameState}>
+			<LobbySettingsContext.Provider value={lobbySettings}>
 			<SettingsContext.Provider value={settings}>
 				<div className="titlebar">
 					<span className="title">Sus Chat {appVersion}</span>
@@ -112,6 +123,7 @@ function App() {
 				<Settings open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 				{page}
 			</SettingsContext.Provider>
+			</LobbySettingsContext.Provider>
 		</GameStateContext.Provider>
 	);
 }
